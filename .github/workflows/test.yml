@@ -1,0 +1,80 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mariadb:10.5
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test_db
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        ports:
+          - 3306:3306
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        ports:
+          - 6379:6379
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: pdo_mysql, redis
+        coverage: xdebug
+
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install Composer dependencies
+      run: |
+        composer install --no-interaction --prefer-dist --optimize-autoloader
+
+    - name: Install Node dependencies
+      run: |
+        npm ci
+
+    - name: Run PHPUnit tests
+      run: ./vendor/bin/phpunit --coverage-text
+      env:
+        DATABASE_URL: mysql://root:root@127.0.0.1:3306/test_db
+
+    - name: Run ESLint
+      run: npm run lint
+      continue-on-error: true
+
+    - name: Build frontend
+      run: npm run build
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      if: success()
+      with:
+        files: ./coverage/coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+      continue-on-error: true
