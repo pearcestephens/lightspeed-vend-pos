@@ -49,6 +49,7 @@ jobs:
       with:
         node-version: '20'
         cache: 'npm'
+        cache-dependency-path: 'frontend/package-lock.json'
 
     - name: Install Composer dependencies
       run: |
@@ -56,7 +57,7 @@ jobs:
 
     - name: Install Node dependencies
       run: |
-        npm ci
+        cd frontend && npm ci --legacy-peer-deps
 
     - name: Run PHPUnit tests
       run: ./vendor/bin/phpunit --coverage-text
@@ -64,11 +65,11 @@ jobs:
         DATABASE_URL: mysql://root:root@127.0.0.1:3306/test_db
 
     - name: Run ESLint
-      run: npm run lint
+      run: cd frontend && npm run lint
       continue-on-error: true
 
     - name: Build frontend
-      run: npm run build
+      run: cd frontend && npm run build
 
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3

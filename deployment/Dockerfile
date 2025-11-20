@@ -1,9 +1,9 @@
 # Build stage
 FROM node:20-alpine AS builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
+COPY frontend/package*.json ./
+RUN npm ci --legacy-peer-deps
+COPY frontend/ .
 RUN npm run build
 
 # Runtime stage
