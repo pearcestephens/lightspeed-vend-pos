@@ -1,6 +1,6 @@
 -- Intelligence Hub Platform Database Schema
--- Generated: 2025-11-20 16:57:19
--- Platform: "LightSpeed Vend POS - Complete Ecosystem Edition"
+-- Generated: 2025-11-20 22:05:06
+-- Platform: LightSpeed Vend POS - Advanced Edition
 
 SET FOREIGN_KEY_CHECKS = 0;
 

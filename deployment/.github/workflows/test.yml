@@ -42,39 +42,19 @@ jobs:
       with:
         php-version: '8.2'
         extensions: pdo_mysql, redis
-        coverage: xdebug
 
     - name: Setup Node
       uses: actions/setup-node@v3
       with:
         node-version: '20'
-        cache: 'npm'
 
-    - name: Install Composer dependencies
+    - name: Install dependencies
       run: |
-        composer install --no-interaction --prefer-dist --optimize-autoloader
-
-    - name: Install Node dependencies
-      run: |
-        npm ci
+        composer install
+        npm install
 
     - name: Run PHPUnit tests
-      run: ./vendor/bin/phpunit --coverage-text
-      env:
-        DATABASE_URL: mysql://root:root@127.0.0.1:3306/test_db
+      run: ./vendor/bin/phpunit
 
     - name: Run ESLint
       run: npm run lint
-      continue-on-error: true
-
-    - name: Build frontend
-      run: npm run build
-
-    - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
-      if: success()
-      with:
-        files: ./coverage/coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-      continue-on-error: true

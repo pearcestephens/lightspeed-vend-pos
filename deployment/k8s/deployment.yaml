@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "lightspeed-vend-pos---complete-ecosystem-edition"-app
-  namespace: "lightspeed-vend-pos---complete-ecosystem-edition"
+  name: lightspeed-vend-pos---advanced-edition-app
+  namespace: lightspeed-vend-pos---advanced-edition
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: "lightspeed-vend-pos---complete-ecosystem-edition"
+      app: lightspeed-vend-pos---advanced-edition
   template:
     metadata:
       labels:
-        app: "lightspeed-vend-pos---complete-ecosystem-edition"
+        app: lightspeed-vend-pos---advanced-edition
     spec:
       containers:
-      - name: "lightspeed-vend-pos---complete-ecosystem-edition"
-        image: "lightspeed-vend-pos---complete-ecosystem-edition":latest
+      - name: lightspeed-vend-pos---advanced-edition
+        image: lightspeed-vend-pos---advanced-edition:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 9000
@@ -23,12 +23,12 @@ spec:
         - name: DB_HOST
           valueFrom:
             configMapKeyRef:
-              name: "lightspeed-vend-pos---complete-ecosystem-edition"-config
+              name: lightspeed-vend-pos---advanced-edition-config
               key: db_host
         - name: REDIS_HOST
           valueFrom:
             configMapKeyRef:
-              name: "lightspeed-vend-pos---complete-ecosystem-edition"-config
+              name: lightspeed-vend-pos---advanced-edition-config
               key: redis_host
         resources:
           requests:
