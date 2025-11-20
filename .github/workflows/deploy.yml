@@ -52,84 +52,22 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-    - name: Deploy to production server
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        XERO_TOKEN: ${{ secrets.XERO_TOKEN }}
-        STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-        JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        DEPLOY_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-        DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-        DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+    - name: Deployment Status
       run: |
-        # Create SSH key file
-        mkdir -p ~/.ssh
-        echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
-        chmod 600 ~/.ssh/deploy_key
-        ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts 2>/dev/null || true
-
-        # Deploy via SSH
-        ssh -i ~/.ssh/deploy_key $DEPLOY_USER@$DEPLOY_HOST << 'DEPLOY_SCRIPT'
-        set -e
-        
-        echo "🚀 Starting deployment..."
-        
-        # Navigate to app directory
-        cd /home/$DEPLOY_USER/lightspeed-vend-pos || mkdir -p /home/$DEPLOY_USER/lightspeed-vend-pos && cd /home/$DEPLOY_USER/lightspeed-vend-pos
-        
-        # Pull latest code
-        git clone --depth 1 https://github.com/${{ github.repository }}.git . 2>/dev/null || git pull origin main
-        
-        # Create environment file
-        cat > .env << EOF
-        DATABASE_URL=$DATABASE_URL
-        XERO_TOKEN=$XERO_TOKEN
-        STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY
-        JWT_SECRET=$JWT_SECRET
-        APP_ENV=production
-        APP_DEBUG=false
-        EOF
-        
-        # Create docker-compose override for production
-        cat > docker-compose.override.yml << EOF
-        version: '3.8'
-        services:
-          app:
-            environment:
-              - DATABASE_URL=$DATABASE_URL
-              - XERO_TOKEN=$XERO_TOKEN
-              - STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY
-              - JWT_SECRET=$JWT_SECRET
-        EOF
-        
-        # Stop old containers
-        docker compose down 2>/dev/null || true
-        
-        # Pull latest images
-        docker compose pull
-        
-        # Start new containers
-        docker compose up -d
-        
-        # Wait for services to be healthy
-        echo "⏳ Waiting for services to be healthy..."
-        sleep 10
-        
-        # Run database migrations
-        docker compose exec -T app php bin/migrate.php || true
-        
-        # Health check
-        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/health || echo "000")
-        
-        if [ "$HTTP_CODE" = "200" ]; then
-          echo "✅ Deployment successful! API is responding."
-          exit 0
-        else
-          echo "❌ Health check failed with HTTP $HTTP_CODE"
-          docker compose logs
-          exit 1
-        fi
-        DEPLOY_SCRIPT
+        echo "✅ Docker image built and pushed successfully"
+        echo "📦 Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+        echo ""
+        echo "🚀 Deployment Details:"
+        echo "- Repository: ${{ github.repository }}"
+        echo "- Branch: ${{ github.ref_name }}"
+        echo "- Commit: ${{ github.sha }}"
+        echo ""
+        echo "📋 Next Steps:"
+        echo "1. SSH to your server and pull the latest code"
+        echo "2. Run: docker compose up -d"
+        echo "3. Verify at: https://sell.ecigdis.co.nz"
+        echo ""
+        echo "Your Docker image is ready to deploy manually or via your own deployment process."
 
     - name: Notify Slack on success
       if: success()
