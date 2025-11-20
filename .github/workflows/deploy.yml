@@ -52,22 +52,53 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
+    - name: Deploy to Cloudways Server
+      run: |
+        echo "🚀 Deploying to Cloudways server..."
+
+        # Install SSH key
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+        # Deploy to server
+        ssh -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'ENDSSH'
+          cd ~/applications/nsvmswhebv/public_html
+
+          # Backup current version
+          if [ -d "lightspeed-pos-backup" ]; then
+            rm -rf lightspeed-pos-backup
+          fi
+          if [ -d "pos" ]; then
+            mv pos lightspeed-pos-backup
+          fi
+
+          # Clone/pull latest from GitHub
+          if [ ! -d "pos" ]; then
+            git clone https://github.com/pearcestephens/lightspeed-vend-pos.git pos
+          fi
+
+          cd pos
+          git fetch origin
+          git reset --hard origin/main
+
+          # Install dependencies
+          composer install --no-dev --optimize-autoloader --no-interaction
+          cd frontend && npm install --legacy-peer-deps && npm run build
+          cd ..
+
+          # Set permissions
+          chmod -R 755 .
+
+          echo "✅ Deployment complete!"
+        ENDSSH
+
     - name: Deployment Status
       run: |
-        echo "✅ Docker image built and pushed successfully"
-        echo "📦 Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
-        echo ""
-        echo "🚀 Deployment Details:"
-        echo "- Repository: ${{ github.repository }}"
-        echo "- Branch: ${{ github.ref_name }}"
-        echo "- Commit: ${{ github.sha }}"
-        echo ""
-        echo "📋 Next Steps:"
-        echo "1. SSH to your server and pull the latest code"
-        echo "2. Run: docker compose up -d"
-        echo "3. Verify at: https://sell.ecigdis.co.nz"
-        echo ""
-        echo "Your Docker image is ready to deploy manually or via your own deployment process."
+        echo "✅ Deployed to https://sell.ecigdis.co.nz"
+        echo "📦 Docker image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+        echo "🎯 Live at: https://sell.ecigdis.co.nz/pos"
 
     - name: Notify Slack on success
       if: success() && env.SLACK_WEBHOOK_URL != ''
