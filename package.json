@@ -1,0 +1,15 @@
+{
+  "name": "lightspeed-vend-pos",
+  "version": "1.0.0",
+  "description": "Enterprise POS system with web order fulfillment",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'Building...'",
+    "lint": "echo 'Linting...'",
+    "test": "echo 'Running tests...'"
+  },
+  "keywords": ["pos", "inventory", "xero", "stripe"],
+  "author": "Pearce Stephens",
+  "license": "MIT",
+  "dependencies": {}
+}
