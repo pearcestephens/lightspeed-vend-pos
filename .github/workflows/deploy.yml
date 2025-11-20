@@ -70,8 +70,9 @@ jobs:
         echo "Your Docker image is ready to deploy manually or via your own deployment process."
 
     - name: Notify Slack on success
-      if: success()
+      if: success() && env.SLACK_WEBHOOK_URL != ''
       uses: slackapi/slack-github-action@v1.24.0
+      continue-on-error: true
       with:
         payload: |
           {
@@ -91,8 +92,9 @@ jobs:
         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
     - name: Notify Slack on failure
-      if: failure()
+      if: failure() && env.SLACK_WEBHOOK_URL != ''
       uses: slackapi/slack-github-action@v1.24.0
+      continue-on-error: true
       with:
         payload: |
           {
