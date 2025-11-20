@@ -44,7 +44,8 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v4
       with:
-        context: ./deployment
+        context: .
+        file: ./deployment/Dockerfile
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
@@ -70,15 +71,15 @@ jobs:
         # Deploy via SSH
         ssh -i ~/.ssh/deploy_key $DEPLOY_USER@$DEPLOY_HOST << 'DEPLOY_SCRIPT'
         set -e
-        
+
         echo "🚀 Starting deployment..."
-        
+
         # Navigate to app directory
         cd /home/$DEPLOY_USER/lightspeed-vend-pos || mkdir -p /home/$DEPLOY_USER/lightspeed-vend-pos && cd /home/$DEPLOY_USER/lightspeed-vend-pos
-        
+
         # Pull latest code
         git clone --depth 1 https://github.com/${{ github.repository }}.git . 2>/dev/null || git pull origin main
-        
+
         # Create environment file
         cat > .env << EOF
         DATABASE_URL=$DATABASE_URL
@@ -88,7 +89,7 @@ jobs:
         APP_ENV=production
         APP_DEBUG=false
         EOF
-        
+
         # Create docker-compose override for production
         cat > docker-compose.override.yml << EOF
         version: '3.8'
@@ -100,26 +101,26 @@ jobs:
               - STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY
               - JWT_SECRET=$JWT_SECRET
         EOF
-        
+
         # Stop old containers
         docker compose down 2>/dev/null || true
-        
+
         # Pull latest images
         docker compose pull
-        
+
         # Start new containers
         docker compose up -d
-        
+
         # Wait for services to be healthy
         echo "⏳ Waiting for services to be healthy..."
         sleep 10
-        
+
         # Run database migrations
         docker compose exec -T app php bin/migrate.php || true
-        
+
         # Health check
         HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/health || echo "000")
-        
+
         if [ "$HTTP_CODE" = "200" ]; then
           echo "✅ Deployment successful! API is responding."
           exit 0
