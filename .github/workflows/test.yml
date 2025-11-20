@@ -60,9 +60,10 @@ jobs:
         cd frontend && npm ci --legacy-peer-deps
 
     - name: Run PHPUnit tests
-      run: ./vendor/bin/phpunit --coverage-text
+      run: ./vendor/bin/phpunit --coverage-text --testdox
       env:
         DATABASE_URL: mysql://root:root@127.0.0.1:3306/test_db
+      continue-on-error: false
 
     - name: Run ESLint
       run: cd frontend && npm run lint

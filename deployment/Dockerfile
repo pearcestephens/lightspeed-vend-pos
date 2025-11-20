@@ -1,41 +1,47 @@
-# Build stage
-FROM node:20-alpine AS builder
-WORKDIR /app
+# Frontend build stage
+FROM node:20-alpine AS frontend-builder
+WORKDIR /build
 COPY frontend/package*.json ./
 RUN npm ci --legacy-peer-deps
-COPY frontend/ .
+COPY frontend/ ./
 RUN npm run build
 
-# Runtime stage
+# PHP Runtime stage
 FROM php:8.2-fpm-alpine
 
 # Install system dependencies
 RUN apk add --no-cache \
     mariadb-client \
-    redis \
     curl \
     git \
     zip \
-    unzip
+    unzip \
+    bash
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql opcache redis
+RUN docker-php-ext-install pdo_mysql opcache
 
-# Copy composer dependencies
-COPY --from=builder /app /app
-WORKDIR /app
-
-# Copy Composer from builder if available
-COPY composer.lock composer.json ./
+# Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-RUN composer install --no-dev --optimize-autoloader
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy application files
+COPY --chown=www-data:www-data . /var/www/html
+
+# Copy frontend build artifacts
+COPY --from=frontend-builder --chown=www-data:www-data /build/build /var/www/html/public/build
+
+# Install composer dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Set permissions
-RUN chown -R www-data:www-data /app
+RUN chown -R www-data:www-data /var/www/html
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:9000/health || exit 1
+    CMD curl -f http://localhost:9000/api/health || exit 1
 
 EXPOSE 9000
 USER www-data
