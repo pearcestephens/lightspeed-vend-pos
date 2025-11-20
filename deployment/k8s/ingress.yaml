@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "lightspeed-vend-pos---complete-ecosystem-edition"-ingress
+  namespace: "lightspeed-vend-pos---complete-ecosystem-edition"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: "lightspeed-vend-pos---complete-ecosystem-edition".example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: "lightspeed-vend-pos---complete-ecosystem-edition"-service
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - "lightspeed-vend-pos---complete-ecosystem-edition".example.com
+    secretName: "lightspeed-vend-pos---complete-ecosystem-edition"-tls

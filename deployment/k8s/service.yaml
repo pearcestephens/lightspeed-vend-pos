@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "lightspeed-vend-pos---complete-ecosystem-edition"-service
+  namespace: "lightspeed-vend-pos---complete-ecosystem-edition"
+spec:
+  type: LoadBalancer
+  selector:
+    app: "lightspeed-vend-pos---complete-ecosystem-edition"
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 9000

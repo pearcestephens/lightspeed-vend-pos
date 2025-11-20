@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "lightspeed-vend-pos---complete-ecosystem-edition"-app
+  namespace: "lightspeed-vend-pos---complete-ecosystem-edition"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: "lightspeed-vend-pos---complete-ecosystem-edition"
+  template:
+    metadata:
+      labels:
+        app: "lightspeed-vend-pos---complete-ecosystem-edition"
+    spec:
+      containers:
+      - name: "lightspeed-vend-pos---complete-ecosystem-edition"
+        image: "lightspeed-vend-pos---complete-ecosystem-edition":latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9000
+        env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: "lightspeed-vend-pos---complete-ecosystem-edition"-config
+              key: db_host
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: "lightspeed-vend-pos---complete-ecosystem-edition"-config
+              key: redis_host
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 9000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 9000
+          initialDelaySeconds: 10
+          periodSeconds: 5

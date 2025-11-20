@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: "lightspeed_vend_pos_-_complete_ecosystem_edition"_php
+    volumes:
+      - .:/app
+      - php_logs:/var/log/php-fpm
+    ports:
+      - "9000:9000"
+    environment:
+      - PHP_IDE_CONFIG=serverName="lightspeed_vend_pos_-_complete_ecosystem_edition"
+      - DB_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - "lightspeed_vend_pos_-_complete_ecosystem_edition"_network
+
+  mysql:
+    image: mariadb:10.5
+    container_name: "lightspeed_vend_pos_-_complete_ecosystem_edition"_mysql
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: "lightspeed_vend_pos_-_complete_ecosystem_edition"
+      MYSQL_USER: "lightspeed_vend_pos_-_complete_ecosystem_edition"
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    networks:
+      - "lightspeed_vend_pos_-_complete_ecosystem_edition"_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: "lightspeed_vend_pos_-_complete_ecosystem_edition"_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - "lightspeed_vend_pos_-_complete_ecosystem_edition"_network
+
+  nginx:
+    image: nginx:alpine
+    container_name: "lightspeed_vend_pos_-_complete_ecosystem_edition"_nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./public:/app/public:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - php
+    networks:
+      - "lightspeed_vend_pos_-_complete_ecosystem_edition"_network
+
+volumes:
+  mysql_data:
+  redis_data:
+  php_logs:
+
+networks:
+  "lightspeed_vend_pos_-_complete_ecosystem_edition"_network:
+    driver: bridge
