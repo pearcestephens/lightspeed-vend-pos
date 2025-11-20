@@ -428,6 +428,6 @@ Questions? See the comprehensive documentation above.
 
 ---
 
-**Built with ❤️ for modern retail**  
-Generated: November 2025  
+**Built with ❤️ for modern retail**
+Generated: November 2025
 Ready to deploy: YES
