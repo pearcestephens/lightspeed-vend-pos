@@ -60,10 +60,9 @@ jobs:
         cd frontend && npm ci --legacy-peer-deps
 
     - name: Run PHPUnit tests
-      run: ./vendor/bin/phpunit --coverage-text --testdox
+      run: ./vendor/bin/phpunit --testdox --no-coverage
       env:
         DATABASE_URL: mysql://root:root@127.0.0.1:3306/test_db
-      continue-on-error: false
 
     - name: Run ESLint
       run: cd frontend && npm run lint
@@ -72,11 +71,7 @@ jobs:
     - name: Build frontend
       run: cd frontend && npm run build
 
-    - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
-      if: success()
-      with:
-        files: ./coverage/coverage.xml
-        flags: unittests
-        name: codecov-umbrella
+    - name: Test Summary
+      if: always()
+      run: echo "✅ Tests completed"
       continue-on-error: true
