@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecigdis POS - API Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { color: #333; margin-bottom: 20px; }
+        .test-section { 
+            margin: 20px 0; 
+            padding: 20px; 
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        button { 
+            background: #667eea; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        button:hover { background: #5568d3; }
+        .result { 
+            margin-top: 10px; 
+            padding: 15px; 
+            background: white;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { border-left: 4px solid #28a745; }
+        .error { border-left: 4px solid #dc3545; }
+        .info { border-left: 4px solid #17a2b8; }
+        input { 
+            padding: 10px; 
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Ecigdis POS - API Test Suite</h1>
+        
+        <div class="test-section">
+            <h2>1. Authentication</h2>
+            <input type="text" id="username" placeholder="Username" value="admin">
+            <input type="password" id="password" placeholder="Password" value="admin123">
+            <button onclick="testLogin()">Login</button>
+            <button onclick="testLogout()">Logout</button>
+            <button onclick="testGetCurrentUser()">Get Current User</button>
+            <div id="auth-result" class="result info"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. Products</h2>
+            <button onclick="testGetProducts()">Get All Products</button>
+            <button onclick="testSearchProducts()">Search "Aspire"</button>
+            <input type="text" id="barcode" placeholder="Barcode" value="8123456789012">
+            <button onclick="testGetByBarcode()">Lookup by Barcode</button>
+            <div id="products-result" class="result info"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. Dashboard</h2>
+            <button onclick="testDashboard()">Get Dashboard Stats</button>
+            <div id="dashboard-result" class="result info"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. Sales</h2>
+            <button onclick="testCreateSale()">Create Test Sale</button>
+            <button onclick="testGetRecentSales()">Get Recent Sales</button>
+            <div id="sales-result" class="result info"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/pos/api';
+        
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = typeof message === 'object' 
+                ? JSON.stringify(message, null, 2) 
+                : message;
+            element.className = `result ${type}`;
+        }
+
+        async function apiRequest(endpoint, options = {}) {
+            try {
+                const response = await fetch(API_BASE + endpoint, {
+                    ...options,
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+                const data = await response.json();
+                return { success: response.ok, data, status: response.status };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function testLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const result = await apiRequest('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ username, password })
+            });
+            log('auth-result', result.data || result.error, result.success ? 'success' : 'error');
+        }
+
+        async function testLogout() {
+            const result = await apiRequest('/auth/logout', { method: 'POST' });
+            log('auth-result', result.data || result.error, result.success ? 'success' : 'error');
+        }
+
+        async function testGetCurrentUser() {
+            const result = await apiRequest('/auth/me');
+            log('auth-result', result.data || result.error, result.success ? 'success' : 'error');
+        }
+
+        async function testGetProducts() {
+            const result = await apiRequest('/products');
+            log('products-result', result.data || result.error, result.success ? 'success' : 'error');
+        }
+
+        async function testSearchProducts() {
+            const result = await apiRequest('/products?search=Aspire');
+            log('products-result', result.data || result.error, result.success ? 'success' : 'error');
+        }
+
+        async function testGetByBarcode() {
+            const barcode = document.getElementById('barcode').value;
+            const result = await apiRequest(`/products/barcode/${encodeURIComponent(barcode)}`);
+            log('products-result', result.data || result.error, result.success ? 'success' : 'error');
+        }
+
+        async function testDashboard() {
+            const result = await apiRequest('/dashboard');
+            log('dashboard-result', result.data || result.error, result.success ? 'success' : 'error');
+        }
+
+        async function testCreateSale() {
+            const saleData = {
+                register_id: 1,
+                subtotal: 89.96,
+                tax_amount: 13.49,
+                total_amount: 103.45,
+                items: [
+                    { product_id: 1, quantity: 2, unit_price: 44.98, tax_amount: 6.75, line_total: 51.73 }
+                ],
+                payments: [
+                    { method: 'cash', amount: 103.45 }
+                ]
+            };
+            const result = await apiRequest('/sales', {
+                method: 'POST',
+                body: JSON.stringify(saleData)
+            });
+            log('sales-result', result.data || result.error, result.success ? 'success' : 'error');
+        }
+
+        async function testGetRecentSales() {
+            const result = await apiRequest('/sales');
+            log('sales-result', result.data || result.error, result.success ? 'success' : 'error');
+        }
+
+        // Auto-run dashboard test on load
+        window.addEventListener('load', () => {
+            log('auth-result', 'Ready to test! Try logging in with admin/admin123');
+        });
+    </script>
+</body>
+</html>
