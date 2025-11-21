@@ -1,0 +1,20 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /pos/
+    
+    # Redirect root to public
+    RewriteRule ^$ public/ [L]
+    
+    # Serve static files from public
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^public/(.*)$ public/$1 [L]
+    
+    # API routes
+    RewriteRule ^api/(.*)$ routes/api.php [L,QSA]
+    
+    # Everything else goes through index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . index.php [L]
+</IfModule>
