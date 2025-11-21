@@ -1,12 +1,13 @@
-import adapter from '@sveltejs/adapter-auto';
+import adapter from '@sveltejs/adapter-static';
 
 export default {
     kit: {
-        adapter: adapter(),
-        alias: {
-            $components: 'src/components',
-            $lib: 'src/lib',
-            $stores: 'src/lib/stores',
-        },
-    },
+        adapter: adapter({
+            pages: 'dist',
+            assets: 'dist',
+            fallback: 'index.html',
+            precompress: false,
+            strict: false
+        })
+    }
 };

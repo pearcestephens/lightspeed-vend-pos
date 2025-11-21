@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lightspeed Vend POS</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        h1 { color: #333; }
+        .status { padding: 10px; background: #e8f5e9; border-left: 4px solid #4caf50; margin: 20px 0; }
+        .links { margin: 20px 0; }
+        .links a { display: inline-block; margin: 10px 10px 10px 0; padding: 10px 20px; background: #2196F3; color: white; text-decoration: none; border-radius: 4px; }
+        .links a:hover { background: #1976D2; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Lightspeed Vend POS System</h1>
+    
+    <div class="status">
+        <strong>✅ Deployment Successful!</strong><br>
+        The POS system backend is deployed and running.
+    </div>
+
+    <div class="links">
+        <a href="/pos/api/health">API Health Check</a>
+        <a href="/pos/api/">API Documentation</a>
+    </div>
+
+    <h2>System Information</h2>
+    <ul>
+        <li><strong>Status:</strong> Active</li>
+        <li><strong>Deployment:</strong> GitHub Actions Automated</li>
+        <li><strong>Last Update:</strong> November 21, 2025</li>
+    </ul>
+
+    <h2>Next Steps</h2>
+    <p>To build and deploy the Svelte frontend:</p>
+    <ol>
+        <li>The frontend source is in <code>/frontend/src</code></li>
+        <li>Build the frontend locally with <code>npm run build</code></li>
+        <li>The built files should be in <code>/frontend/dist</code></li>
+        <li>These will be served automatically on next deployment</li>
+    </ol>
+</body>
+</html>

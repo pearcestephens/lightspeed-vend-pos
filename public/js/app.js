@@ -9,6 +9,8 @@ import { Inventory } from './modules/7-inventory.js';
 import { Customers } from './modules/8-customers.js';
 import { Reports } from './modules/9-reports.js';
 import { Settings } from './modules/10-settings.js';
+import { Suppliers } from './modules/11-suppliers.js';
+import { Migration } from './modules/12-migration.js';
 
 class App {
     constructor() {
@@ -24,7 +26,9 @@ class App {
             inventory: new Inventory(this.state, this.api),
             customers: new Customers(this.state, this.api),
             reports: new Reports(this.state, this.api),
-            settings: new Settings(this.state, this.api)
+            settings: new Settings(this.state, this.api),
+            suppliers: new Suppliers(this.state, this.api),
+            migration: new Migration(this.state, this.api)
         };
         
         this.init();
@@ -33,7 +37,7 @@ class App {
     init() {
         this.navigation.render();
         this.setupRouting();
-        this.router.navigate(window.location.hash || '#/dashboard');
+        this.router.navigate(window.location.hash || '#/register');
     }
     
     setupRouting() {
@@ -43,6 +47,8 @@ class App {
         this.router.on('/customers', () => this.pages.customers.render());
         this.router.on('/reports', () => this.pages.reports.render());
         this.router.on('/settings', () => this.pages.settings.render());
+        this.router.on('/suppliers', () => this.pages.suppliers.render());
+        this.router.on('/migration', () => this.pages.migration.render());
     }
 }
 
